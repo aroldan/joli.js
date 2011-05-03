@@ -151,7 +151,7 @@ joli.Connection = function(database) {
 
 joli.Connection.prototype = {
   execute: function(query) {
-    //Titanium.API.log('debug', query);
+    Titanium.API.log('debug', query);
     return this.database.execute(query);
   },
 
@@ -718,6 +718,12 @@ joli.record.prototype = {
   },
 
   save: function() {
+  	// reload columns that are defined for this model so we can capture
+  	// values loaded w/o fromArray
+  	joli.each(this._options.columns, function(colType, colName) {
+      this._data[colName] = this[colName];
+    }, this);
+    
     var data = { data: this._data };
 
     if (this.isChanged()) {
