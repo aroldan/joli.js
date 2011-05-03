@@ -151,7 +151,7 @@ joli.Connection = function(database) {
 
 joli.Connection.prototype = {
   execute: function(query) {
-//    Titanium.API.log('debug', query);
+    //Titanium.API.log('debug', query);
     return this.database.execute(query);
   },
 
@@ -238,8 +238,30 @@ joli.model.prototype = {
     if (constraints.limit) {
       q.limit(constraints.limit);
     }
+    
 
-    return q.execute();
+    var rows = q.execute();
+    
+    // return flat object instead of a wrapped record if flat is set
+    if(constraints.flat) {
+    	return rows;
+    }
+    
+    var out = [];
+    var thisModel = this;
+    
+    // parse the rows and wrap them as records
+    joli.each(rows, function(value, field) {
+    	var row = new joli.record(thisModel);
+    	
+    	row.fromArray(value);
+    	row.isNew = function() {
+    		return false;
+    	}
+    	out.push(row);
+    });
+    
+    return out;
   },
 
   count: function(constraints) {
