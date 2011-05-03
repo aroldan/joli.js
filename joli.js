@@ -210,6 +210,7 @@ joli.model = function(options) {
 
   joli.setOptions.call(this, options, defaults);
   this.table = this.options.table;
+  this.methods = options.methods;
 
   if (!joli.models.has(this.table)) {
     joli.models.set(this.table, this);
@@ -643,6 +644,11 @@ joli.record = function(table) {
     columns: table.getColumns()
   };
   this._data = {};
+  if (table.methods) {
+    joli.each(table.methods, function(method, name) {
+      this[name] = method;
+    }, this);
+  }
 };
 
 joli.record.prototype = {
