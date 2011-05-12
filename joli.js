@@ -15,6 +15,31 @@ var joli = {
         break;
     }
   },
+  
+  wrap: function(dictionary, model) { // wrap a dictionary as a joli.record object
+	var row = new joli.record(model);
+	
+	row.fromArray(dictionary);
+	row.isNew = function() { return false; };
+	return row;
+  },
+  
+  wrapResults: function(rows, model, constraints) {
+  	// wrap a results set from joli.query.execute
+  	// as a set of joli.records of type model
+  	if(constraints && constraints.flat) {
+    	return rows;
+    }
+    
+    var out = [];
+    
+    // parse the rows and wrap them as records
+    joli.each(rows, function(thisRow, idx) {
+    	out.push(joli.wrap(thisRow, model));
+    });
+    
+    return out;
+  },
 
   extend: function(baseClass, options) {
     if (!this.options) {
@@ -241,27 +266,9 @@ joli.model.prototype = {
     
 
     var rows = q.execute();
-    
-    // return flat object instead of a wrapped record if flat is set
-    if(constraints.flat) {
-    	return rows;
-    }
-    
-    var out = [];
     var thisModel = this;
     
-    // parse the rows and wrap them as records
-    joli.each(rows, function(value, field) {
-    	var row = new joli.record(thisModel);
-    	
-    	row.fromArray(value);
-    	row.isNew = function() {
-    		return false;
-    	}
-    	out.push(row);
-    });
-    
-    return out;
+    return joli.wrapResults(rows, thisModel, constraints);
   },
 
   count: function(constraints) {
@@ -299,7 +306,8 @@ joli.model.prototype = {
   },
 
   findBy: function(field, value) {
-    return new joli.query().select().from(this.table).where(field + ' = ?', value).execute();
+    var rows = new joli.query().select().from(this.table).where(field + ' = ?', value).execute();
+    return joli.wrapResults(rows, this);
   },
 
   findById: function(value) {
@@ -308,6 +316,8 @@ joli.model.prototype = {
 
   findOneBy: function(field, value) {
     var result = new joli.query().select().from(this.table).where(field + ' = ?', value).limit(1).execute();
+    
+    result = joli.wrapResults(result, this);
 
     if (result.length === 0) {
       return false;
