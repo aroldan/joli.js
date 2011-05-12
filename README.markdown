@@ -190,6 +190,17 @@ In some cases however, you will find this way of querying your models just too l
       order: ['last_name desc', 'first_name asc']
     });
 
+When querying models in this fashion, using all() or the findBy methods, the resulting object is returned as a joli.record object, meaning the following syntax is totally cool:
+
+	var rows = models.human.findBy('first_name', 'John');
+	
+	for(var j=rows.length, i=0; i<j; i++) {
+		var thisPerson = rows[i];
+		thisPerson.last_name = 'SuperDoe';
+		thisPerson.save();
+	}
+
+This will change all Johns to have the last name `SuperDoe`.
 
 ## Internals
 joli.js is made of several classes:
