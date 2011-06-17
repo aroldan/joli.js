@@ -311,7 +311,7 @@ joli.model.prototype = {
   },
 
   findById: function(value) {
-    return this.findBy('id', value);
+    return this.findOneBy('id', value);
   },
 
   findOneBy: function(field, value) {
