@@ -769,8 +769,6 @@ joli.record.prototype = {
       this._originalData[colName] = this._data[colName];
     }, this);
 
-    this._data = this._originalData;
-
     this.isNew = function() {
       return false;
     };
